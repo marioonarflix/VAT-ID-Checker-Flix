@@ -1,0 +1,4 @@
+anfragendeUstid,angefragteUstid,firmenname,ort,strasse,plz
+DE123456789,ATU12345678,Musterhaus GmbH & Co KG,Musterort,Musterstrasse 22,12345
+DE123456789,FR12345678901,Musterfirma SARL,Paris,12 Rue de la République,75001
+DE123456789,IT12345678901,Muster AG,Roma,Via Nazionale 1,00184
