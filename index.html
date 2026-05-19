@@ -16,6 +16,8 @@
     label { display: block; margin-top: 1rem; font-weight: 600; }
     input, select, textarea, button { font: inherit; }
     input, select, textarea { width: 100%; margin-top: .45rem; padding: .9rem 1rem; border: 1px solid #d7e8de; border-radius: 14px; font-size: 1rem; outline: none; transition: border-color .2s ease, box-shadow .2s ease; background: #fff; }
+    .top-banner select { width: auto; min-width: 8rem; font-size: .85rem; padding: .55rem .75rem; }
+    .top-banner label { margin-bottom: .25rem; display: inline-block; }
     input:focus, select:focus, textarea:focus { border-color: #3bab1a; box-shadow: 0 0 0 4px rgba(59, 171, 26, .18); }
     .controls { display: flex; gap: .6rem; justify-content: flex-end; flex-wrap: wrap; }
     .controls button { width: 10rem; min-width: 10rem; padding: .8rem .95rem; }
@@ -54,18 +56,25 @@
   <div class="page">
     <div class="top-banner">
       <div>
-        <h1>FlixBus VAT-ID Prüfer</h1>
-        <p>Importiere Stammdaten aus Excel oder CSV und prüfe USt-IDs direkt mit der BZSt eVATR REST-API.</p>
+        <h1 id="bannerTitle">FlixBus VAT-ID Prüfer</h1>
+        <p id="bannerDescription">Importiere Stammdaten aus Excel oder CSV und prüfe USt-IDs direkt mit der BZSt eVATR REST-API.</p>
       </div>
-      <div class="badge">EU-B2B</div>
+      <div>
+        <label for="langSelect" class="small" id="langLabel">Sprache</label>
+        <select id="langSelect" aria-label="Language selector">
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="badge" id="badgeLabel">EU-B2B</div>
     </div>
     <div class="card">
-      <p class="small">Erlaubte Spalten: <code>anfragendeUstid</code>, <code>angefragteUstid</code>, <code>firmenname</code>, <code>ort</code>, <code>strasse</code>, <code>plz</code>.</p>
+      <p class="small" id="allowedColumns">Erlaubte Spalten: <code>anfragendeUstid</code>, <code>angefragteUstid</code>, <code>firmenname</code>, <code>ort</code>, <code>strasse</code>, <code>plz</code>.</p>
       <div class="input-row two">
         <div>
-          <label for="fileInput">Datei importieren</label>
+          <label for="fileInput" id="fileLabel">Datei importieren</label>
           <input id="fileInput" type="file" accept=".csv,.xls,.xlsx" />
-          <p class="small">Erlaubte Spalten: <code>anfragendeUstid</code>, <code>angefragteUstid</code>, <code>firmenname</code>, <code>ort</code>, <code>strasse</code>, <code>plz</code>.</p>
+          <p class="small" id="fileHelp">Erlaubte Spalten: <code>anfragendeUstid</code>, <code>angefragteUstid</code>, <code>firmenname</code>, <code>ort</code>, <code>strasse</code>, <code>plz</code>.</p>
         </div>
         <div>
           <label>&nbsp;</label>
@@ -78,15 +87,15 @@
 
       <div id="sheetSelectorContainer" class="input-row hidden">
         <div>
-          <label for="sheetSelect">Blatt auswählen</label>
+          <label for="sheetSelect" id="sheetSelectLabel">Blatt auswählen</label>
           <select id="sheetSelect"></select>
-          <p class="small">Wählen Sie bei mehreren Blättern das richtige Stammblatt aus.</p>
+          <p class="small" id="sheetSelectHelp">Wählen Sie bei mehreren Blättern das richtige Stammblatt aus.</p>
         </div>
       </div>
 
       <div id="importInfo" class="info-block hidden"></div>
       <div id="previewCard" class="card hidden">
-        <h2>Import-Vorschau</h2>
+        <h2 id="previewTitle">Import-Vorschau</h2>
         <div id="previewSummary" class="info-block"></div>
         <div id="previewTableWrapper"></div>
       </div>
@@ -97,18 +106,18 @@
     </div>
 
     <div class="card">
-      <h2>Ergebnis-Dashboard</h2>
+      <h2 id="dashboardTitle">Ergebnis-Dashboard</h2>
       <div class="dashboard-grid" id="dashboardGrid">
-        <div class="stat-card"><span>Gesamt</span><strong id="statTotal">0</strong></div>
-        <div class="stat-card"><span>Validiert</span><strong id="statChecked">0</strong></div>
-        <div class="stat-card"><span>Erfolgreich</span><strong id="statSuccess">0</strong></div>
-        <div class="stat-card"><span>Fehler</span><strong id="statErrors">0</strong></div>
+        <div class="stat-card"><span id="statLabelTotal">Gesamt</span><strong id="statTotal">0</strong></div>
+        <div class="stat-card"><span id="statLabelChecked">Validiert</span><strong id="statChecked">0</strong></div>
+        <div class="stat-card"><span id="statLabelSuccess">Erfolgreich</span><strong id="statSuccess">0</strong></div>
+        <div class="stat-card"><span id="statLabelErrors">Fehler</span><strong id="statErrors">0</strong></div>
       </div>
       <div id="dashboardHint" class="hint hidden"></div>
     </div>
 
     <div class="card">
-      <h2>Detailausgabe</h2>
+      <h2 id="detailTitle">Detailausgabe</h2>
       <div id="resultLog" class="status hidden"></div>
       <div id="resultTableWrapper"></div>
     </div>
@@ -134,6 +143,181 @@
     const statSuccess = document.getElementById('statSuccess');
     const statErrors = document.getElementById('statErrors');
     const dashboardHint = document.getElementById('dashboardHint');
+    const langSelect = document.getElementById('langSelect');
+
+    const translations = {
+      de: {
+        bannerTitle: 'FlixBus VAT-ID Prüfer',
+        bannerDescription: 'Importiere Stammdaten aus Excel oder CSV und prüfe USt-IDs direkt mit der BZSt eVATR REST-API.',
+        badgeLabel: 'EU-B2B',
+        langLabel: 'Sprache',
+        allowedColumns: 'Erlaubte Spalten: anfragendeUstid, angefragteUstid, firmenname, ort, strasse, plz.',
+        fileLabel: 'Datei importieren',
+        fileHelp: 'Erlaubte Spalten: anfragendeUstid, angefragteUstid, firmenname, ort, strasse, plz.',
+        importButton: 'Importieren',
+        resetButton: 'Datei zurücksetzen',
+        sheetSelectLabel: 'Blatt auswählen',
+        sheetSelectHelp: 'Wählen Sie bei mehreren Blättern das richtige Stammblatt aus.',
+        previewTitle: 'Import-Vorschau',
+        batchCheckButton: 'Prüfen',
+        exportButton: 'Ergebnisse exportieren',
+        dashboardTitle: 'Ergebnis-Dashboard',
+        statLabelTotal: 'Gesamt',
+        statLabelChecked: 'Validiert',
+        statLabelSuccess: 'Erfolgreich',
+        statLabelErrors: 'Fehler',
+        dashboardHintEmpty: 'Importiere zuerst eine Datei, um Ergebnisse anzuzeigen.',
+        dashboardHintReady: 'Klicke auf Prüfen, um Validierungsergebnisse zu sehen.',
+        detailTitle: 'Detailausgabe',
+        noResults: 'Keine Ergebnisse verfügbar.',
+        statusValid: 'gültig',
+        statusInvalid: 'ungültig',
+        errorImport: 'Fehler beim Import: {message}',
+        noDataError: 'Die Datei enthält keine Daten oder konnte nicht gelesen werden.',
+        fileLoaded: 'Datei geladen: {file}. Wähle ggf. das Blatt und klicke dann auf Importieren.',
+        importSummary: 'Import erfolgreich. Blatt: {sheet}. Zeilen gesamt: {total}. Gültige Zeilen: {valid}. Ungültige Zeilen: {invalid}.',
+        sheetSelected: 'Ausgewähltes Blatt: {sheet}. Klicke auf Importieren, um die Daten einzulesen.',
+        checkingRow: 'Prüfe Zeile {current} von {total}...',
+        checkingDetail: 'Anfrage wird gesendet...',
+        finished: 'Prüfung abgeschlossen.',
+        fileReadError: 'Datei konnte nicht gelesen werden.',
+        apiNoData: 'API lieferte keine Firma/Ort-Daten',
+        errorMissingRequester: 'Fehlende anfragende USt-IdNr.',
+        errorMissingRequested: 'Fehlende angefragte USt-IdNr.',
+        statusNotChecked: 'Nicht geprüft',
+        statusInvalidRow: 'Ungültig',
+        statusProcessing: 'In Bearbeitung',
+        statusChecking: 'Prüfe',
+        statusSuccessful: 'Erfolgreich',
+        statusError: 'Fehler',
+        statusConnectionError: 'Verbindungsfehler',
+        detailInvalidMissingFields: 'Ungültige Zeile: {errors}',
+        detailNotChecked: '',
+        detailChecking: 'Wird geprüft...',
+        detailRequestSent: 'Anfrage wird gesendet...',
+        detailValid: 'gültig ({status})',
+        detailStatusInfo: 'Status: {status}{validFrom}{validTo}',
+        detailConnectionError: 'Verbindungsfehler: {message}',
+        apiLabel: 'API',
+        startChecking: 'Starte Prüfung...',
+        previewOverflow: 'Es werden {max} von {total} Zeilen angezeigt.',
+        colRequester: 'Anfragende USt-IdNr.',
+        colRequested: 'Angefragte USt-IdNr.',
+        colCompany: 'Firma',
+        colCity: 'Ort',
+        colStatus: 'Status',
+        colDetails: 'Details',
+        resultOverflow: 'Es werden {max} von {total} Zeilen angezeigt. Exportiert werden alle Zeilen.',
+        colApiCompany: 'API Firma',
+        colApiCity: 'API Ort'
+      },
+      en: {
+        bannerTitle: 'FlixBus VAT-ID Checker',
+        bannerDescription: 'Import master data from Excel or CSV and validate VAT IDs directly with the BZSt eVATR REST API.',
+        badgeLabel: 'EU-B2B',
+        langLabel: 'Language',
+        allowedColumns: 'Allowed columns: anfragendeUstid, angefragteUstid, firmenname, ort, strasse, plz.',
+        fileLabel: 'Import file',
+        fileHelp: 'Allowed columns: anfragendeUstid, angefragteUstid, firmenname, ort, strasse, plz.',
+        importButton: 'Import',
+        resetButton: 'Reset file',
+        sheetSelectLabel: 'Select sheet',
+        sheetSelectHelp: 'Choose the correct sheet if the file contains multiple sheets.',
+        previewTitle: 'Import preview',
+        batchCheckButton: 'Validate',
+        exportButton: 'Export results',
+        dashboardTitle: 'Result dashboard',
+        statLabelTotal: 'Total',
+        statLabelChecked: 'Checked',
+        statLabelSuccess: 'Success',
+        statLabelErrors: 'Errors',
+        dashboardHintEmpty: 'Import a file first to see results.',
+        dashboardHintReady: 'Click Validate to see validation results.',
+        detailTitle: 'Detailed output',
+        noResults: 'No results available.',
+        statusValid: 'valid',
+        statusInvalid: 'invalid',
+        errorImport: 'Import error: {message}',
+        noDataError: 'The file contains no data or could not be read.',
+        fileLoaded: 'Loaded file: {file}. Choose the sheet if needed and click Import.',
+        importSummary: 'Import successful. Sheet: {sheet}. Total rows: {total}. Valid rows: {valid}. Invalid rows: {invalid}.',
+        sheetSelected: 'Selected sheet: {sheet}. Click Import to load the data.',
+        checkingRow: 'Checking row {current} of {total}...',
+        checkingDetail: 'Request sent...',
+        finished: 'Validation complete.',
+        fileReadError: 'File could not be read.',
+        apiNoData: 'API returned no company/city data',
+        errorMissingRequester: 'Missing requester VAT ID.',
+        errorMissingRequested: 'Missing requested VAT ID.',
+        statusNotChecked: 'Not checked',
+        statusInvalidRow: 'Invalid',
+        statusProcessing: 'Processing',
+        statusChecking: 'Checking',
+        statusSuccessful: 'Successful',
+        statusError: 'Error',
+        statusConnectionError: 'Connection error',
+        detailInvalidMissingFields: 'Invalid row: {errors}',
+        detailNotChecked: '',
+        detailChecking: 'Checking...',
+        detailRequestSent: 'Request sent...',
+        detailValid: 'valid ({status})',
+        detailStatusInfo: 'Status: {status}{validFrom}{validTo}',
+        detailConnectionError: 'Connection error: {message}',
+        apiLabel: 'API',
+        startChecking: 'Start checking...',
+        previewOverflow: 'Showing {max} of {total} rows.',
+        colRequester: 'Requester VAT ID',
+        colRequested: 'Requested VAT ID',
+        colCompany: 'Company',
+        colCity: 'City',
+        colStatus: 'Status',
+        colDetails: 'Details',
+        resultOverflow: 'Showing {max} of {total} rows. All rows are exported.',
+        colApiCompany: 'API Company',
+        colApiCity: 'API City'
+      }
+    };
+    let currentLang = 'de';
+
+    function t(key, vars = {}) {
+      let value = translations[currentLang][key] || key;
+      Object.entries(vars).forEach(([name, replacement]) => {
+        value = value.replace(`{${name}}`, replacement);
+      });
+      return value;
+    }
+
+    function updateLanguageTexts() {
+      document.getElementById('bannerTitle').textContent = t('bannerTitle');
+      document.getElementById('bannerDescription').textContent = t('bannerDescription');
+      document.getElementById('badgeLabel').textContent = t('badgeLabel');
+      document.getElementById('langLabel').textContent = t('langLabel');
+      document.getElementById('allowedColumns').textContent = t('allowedColumns');
+      document.getElementById('fileLabel').textContent = t('fileLabel');
+      document.getElementById('fileHelp').textContent = t('fileHelp');
+      performImport.textContent = t('importButton');
+      clearImport.textContent = t('resetButton');
+      document.getElementById('sheetSelectLabel').textContent = t('sheetSelectLabel');
+      document.getElementById('sheetSelectHelp').textContent = t('sheetSelectHelp');
+      document.getElementById('previewTitle').textContent = t('previewTitle');
+      batchCheckButton.textContent = t('batchCheckButton');
+      exportButton.textContent = t('exportButton');
+      document.getElementById('dashboardTitle').textContent = t('dashboardTitle');
+      document.getElementById('statLabelTotal').textContent = t('statLabelTotal');
+      document.getElementById('statLabelChecked').textContent = t('statLabelChecked');
+      document.getElementById('statLabelSuccess').textContent = t('statLabelSuccess');
+      document.getElementById('statLabelErrors').textContent = t('statLabelErrors');
+      document.getElementById('detailTitle').textContent = t('detailTitle');
+      updateDashboard();
+      renderPreview();
+      renderResultTable();
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      langSelect.value = lang;
+      updateLanguageTexts();
+    }
 
     let importedRows = [];
     let checking = false;
@@ -182,7 +366,7 @@
       initializeSheetSelector(sheetNames);
       selectedSheetName = chooseSheet(sheetNames);
       sheetSelect.value = selectedSheetName;
-      showImportMessage(`Datei geladen: ${file.name}. Wähle ggf. das Blatt und klicke dann auf Importieren.`);
+      showImportMessage(t('fileLoaded', { file: file.name }));
       performImport.disabled = false;
       clearImport.disabled = false;
     });
@@ -216,13 +400,17 @@
     sheetSelect.addEventListener('change', () => {
       if (!currentWorkbook) return;
       selectedSheetName = sheetSelect.value;
-      showImportMessage(`Ausgewähltes Blatt: ${selectedSheetName}. Klicke auf Importieren, um die Daten einzulesen.`);
+      showImportMessage(t('sheetSelected', { sheet: selectedSheetName }));
       performImport.disabled = false;
       batchCheckButton.disabled = true;
       exportButton.disabled = true;
       previewCard.classList.add('hidden');
       resultTableWrapper.innerHTML = '';
       updateDashboard();
+    });
+
+    langSelect.addEventListener('change', event => {
+      setLanguage(event.target.value);
     });
 
     function resetImport() {
@@ -256,21 +444,26 @@
 
         importedRows = parseSheet(currentWorkbook, selectedSheetName);
         if (!importedRows.length) {
-          showImportMessage('Die Datei enthält keine Daten oder konnte nicht gelesen werden.', true);
+          showImportMessage(t('noDataError'), true);
           return;
         }
 
         const validCount = importedRows.filter(row => row.valid).length;
         const invalidCount = importedRows.length - validCount;
 
-        showImportMessage(`Import erfolgreich. Blatt: ${selectedSheetName}. Zeilen gesamt: ${importedRows.length}. Gültige Zeilen: ${validCount}. Ungültige Zeilen: ${invalidCount}.`);
+        showImportMessage(t('importSummary', {
+          sheet: selectedSheetName,
+          total: importedRows.length,
+          valid: validCount,
+          invalid: invalidCount
+        }));
         clearImport.disabled = false;
         batchCheckButton.disabled = validCount === 0;
         exportButton.disabled = importedRows.length === 0;
         renderPreview();
         updateDashboard();
       } catch (error) {
-        showImportMessage(`Fehler beim Import: ${error.message}`, true);
+        showImportMessage(t('errorImport', { message: error.message }), true);
       }
     }
 
@@ -309,7 +502,7 @@
           }
         };
 
-        reader.onerror = () => reject(new Error('Datei konnte nicht gelesen werden.'));
+        reader.onerror = () => reject(new Error(t('fileReadError')));
         if (file.name.toLowerCase().endsWith('.csv')) {
           reader.readAsText(file, 'UTF-8');
         } else {
@@ -347,13 +540,19 @@
         apiPlz: '',
         valid: false,
         errors: [],
-        status: 'Nicht geprüft',
-        detail: ''
+        statusKey: 'statusNotChecked',
+        detailKey: 'detailNotChecked',
+        detailParams: {}
       };
 
-      if (!row.anfragendeUstid) row.errors.push('Fehlende anfragende USt-IdNr.');
-      if (!row.angefragteUstid) row.errors.push('Fehlende angefragte USt-IdNr.');
+      if (!row.anfragendeUstid) row.errors.push('errorMissingRequester');
+      if (!row.angefragteUstid) row.errors.push('errorMissingRequested');
       row.valid = row.errors.length === 0;
+      if (!row.valid) {
+        row.statusKey = 'statusInvalidRow';
+        row.detailKey = 'detailInvalidMissingFields';
+        row.detailParams = { errors: row.errors.map(errorKey => t(errorKey)).join('; ') };
+      }
       return row;
     }
 
@@ -364,23 +563,28 @@
       const invalidCount = importedRows.length - validCount;
       const maxPreview = 1000;
 
-      previewSummary.innerHTML = `Importierte Zeilen: ${importedRows.length} | gültig: ${validCount} | ungültig: ${invalidCount}`;
+      previewSummary.innerHTML = ` ${t('importSummary', {
+        sheet: selectedSheetName || '-',
+        total: importedRows.length,
+        valid: validCount,
+        invalid: invalidCount
+      })}`;
       previewCard.classList.remove('hidden');
       previewTableWrapper.innerHTML = renderTable(importedRows.slice(0, maxPreview), true);
       if (importedRows.length > maxPreview) {
-        previewTableWrapper.insertAdjacentHTML('beforeend', `<p class="small">Es werden ${maxPreview} von ${importedRows.length} Zeilen angezeigt.</p>`);
+        previewTableWrapper.insertAdjacentHTML('beforeend', `<p class="small">${t('previewOverflow', { max: maxPreview, total: importedRows.length })}</p>`);
       }
     }
 
     function renderTable(rows, showErrors = false) {
-      if (!rows.length) return '<p class="small">Keine Daten vorhanden.</p>';
-      const headers = ['#', 'Anfragende USt-IdNr.', 'Angefragte USt-IdNr.', 'Firma', 'Ort', 'Status', 'Details'];
+      if (!rows.length) return `<p class="small">${t('noDataError')}</p>`;
+      const headers = ['#', t('colRequester'), t('colRequested'), t('colCompany'), t('colCity'), t('colStatus'), t('colDetails')];
       const cols = ['index', 'anfragendeUstid', 'angefragteUstid', 'firmenname', 'ort', 'status'];
 
       const rowsHtml = rows.map(row => {
         const badgeClass = row.valid ? 'ok' : 'error';
-        const statusText = row.valid ? 'gültig' : 'ungültig';
-        const detailText = showErrors && row.errors.length ? `<div class="small">${row.errors.join('; ')}</div>` : '';
+        const statusText = row.valid ? t('statusValid') : t('statusInvalid');
+        const detailText = showErrors && row.errors.length ? `<div class="small">${row.errors.map(errorKey => t(errorKey)).join('; ')}</div>` : '';
         return `<tr>${cols.map(col => `<td>${escapeHtml(row[col] || '')}</td>`).join('')}<td>${row.valid ? `<span class="badge ok">${statusText}</span>` : `<span class="badge error">${statusText}</span>`}${detailText}</td></tr>`;
       }).join('');
 
@@ -403,10 +607,10 @@
       exportButton.disabled = total === 0;
       if (total === 0) {
         dashboardHint.classList.remove('hidden');
-        dashboardHint.textContent = 'Importiere zuerst eine Datei, um Ergebnisse anzuzeigen.';
+        dashboardHint.textContent = t('dashboardHintEmpty');
       } else if (checked === 0) {
         dashboardHint.classList.remove('hidden');
-        dashboardHint.textContent = 'Klicke auf Prüfen, um Validierungsergebnisse zu sehen.';
+        dashboardHint.textContent = t('dashboardHintReady');
       } else {
         dashboardHint.classList.add('hidden');
       }
@@ -416,7 +620,7 @@
       checking = true;
       batchCheckButton.disabled = true;
       clearImport.disabled = true;
-      batchStatus.textContent = 'Starte Prüfung...';
+      batchStatus.textContent = t('startChecking');
       batchStatus.classList.remove('hidden', 'error', 'success');
       batchStatus.classList.add('status');
       resultLog.classList.add('hidden');
@@ -428,17 +632,19 @@
       for (const row of importedRows) {
         row.checked = false;
         row.passed = false;
-        row.status = row.valid ? 'In Bearbeitung' : 'Ungültig';
-        row.detail = row.valid ? 'Wird geprüft...' : row.errors.join('; ');
+        row.statusKey = row.valid ? 'statusProcessing' : 'statusInvalidRow';
+        row.detailKey = row.valid ? 'detailChecking' : 'detailInvalidMissingFields';
+        row.detailParams = row.valid ? {} : { errors: row.errors.map(errorKey => t(errorKey)).join('; ') };
         updateDashboard();
       }
       renderResultTable();
 
       for (const row of validRows) {
         current += 1;
-        batchStatus.textContent = `Prüfe Zeile ${current} von ${validRows.length}...`;
-        row.status = 'Prüfe';
-        row.detail = 'Anfrage wird gesendet...';
+        batchStatus.textContent = t('checkingRow', { current, total: validRows.length });
+        row.statusKey = 'statusChecking';
+        row.detailKey = 'detailRequestSent';
+        row.detailParams = {};
         renderResultTable();
 
         try {
@@ -463,23 +669,30 @@
           row.apiStrasse = json.ergStrasse || '';
           row.apiPlz = json.ergPlz || '';
           if (response.ok && json.status === 'evatr-0000') {
-            row.status = 'Erfolgreich';
-            row.detail = `gültig (${json.status})`;
+            row.statusKey = 'statusSuccessful';
+            row.detailKey = 'detailValid';
+            row.detailParams = { status: json.status };
           } else {
-            row.status = 'Fehler';
-            row.detail = `Status: ${json.status || 'n/a'}${json.gueltigAb ? ` | gültig ab ${json.gueltigAb}` : ''}${json.gueltigBis ? ` | gültig bis ${json.gueltigBis}` : ''}`;
+            row.statusKey = 'statusError';
+            row.detailKey = 'detailStatusInfo';
+            row.detailParams = {
+              status: json.status || 'n/a',
+              validFrom: json.gueltigAb ? ` | gültig ab ${json.gueltigAb}` : '',
+              validTo: json.gueltigBis ? ` | gültig bis ${json.gueltigBis}` : ''
+            };
           }
         } catch (error) {
           row.checked = true;
           row.passed = false;
-          row.status = 'Verbindungsfehler';
-          row.detail = error.message;
+          row.statusKey = 'statusConnectionError';
+          row.detailKey = 'detailConnectionError';
+          row.detailParams = { message: error.message };
         }
         renderResultTable();
         updateDashboard();
       }
 
-      batchStatus.textContent = 'Prüfung abgeschlossen.';
+      batchStatus.textContent = t('finished');
       batchStatus.classList.add('success');
       checking = false;
       clearImport.disabled = false;
@@ -529,20 +742,21 @@
 
     function renderResultTable() {
       if (!importedRows.length) {
-        resultTableWrapper.innerHTML = '<p class="small">Keine Ergebnisse verfügbar.</p>';
+        resultTableWrapper.innerHTML = `<p class="small">${t('noResults')}</p>`;
         return;
       }
 
       const maxRows = 1000;
       const displayedRows = importedRows.slice(0, maxRows);
-      const overflowNote = importedRows.length > maxRows ? `<p class="small">Es werden ${maxRows} von ${importedRows.length} Zeilen angezeigt. Exportiert werden alle Zeilen.</p>` : '';
+      const overflowNote = importedRows.length > maxRows ? `<p class="small">${t('resultOverflow', { max: maxRows, total: importedRows.length })}</p>` : '';
 
       const rowsHtml = displayedRows.map(row => {
         const badgeType = row.checked ? (row.passed && row.json?.status === 'evatr-0000' ? 'ok' : 'error') : row.valid ? 'warn' : 'error';
-        const statusText = row.status;
+        const statusText = t(row.statusKey || 'statusNotChecked');
         const apiFields = [row.apiFirma, row.apiOrt, row.apiStrasse, row.apiPlz].filter(Boolean);
-        const apiInfo = row.checked ? (apiFields.length ? `API: ${escapeHtml(apiFields.join(' | '))}` : 'API lieferte keine Firma/Ort-Daten') : '';
-        const details = `${row.detail ? `<div class="small">${escapeHtml(row.detail)}</div>` : ''}${apiInfo ? `<div class="small">${apiInfo}</div>` : ''}`;
+        const apiInfo = row.checked ? (apiFields.length ? `${t('apiLabel')}: ${escapeHtml(apiFields.join(' | '))}` : t('apiNoData')) : '';
+        const detailText = row.detailKey ? `<div class="small">${escapeHtml(t(row.detailKey, row.detailParams || {}))}</div>` : '';
+        const details = `${detailText}${apiInfo ? `<div class="small">${apiInfo}</div>` : ''}`;
         return `<tr>
           <td>${row.index}</td>
           <td>${escapeHtml(row.anfragendeUstid)}</td>
@@ -555,10 +769,10 @@
         </tr>`;
       }).join('');
 
-      resultTableWrapper.innerHTML = `<table><thead><tr><th>#</th><th>Anfragende USt-IdNr.</th><th>Angefragte USt-IdNr.</th><th>Firma</th><th>Ort</th><th>API Firma</th><th>API Ort</th><th>Status</th></tr></thead><tbody>${rowsHtml}</tbody></table>${overflowNote}`;
+      resultTableWrapper.innerHTML = `<table><thead><tr><th>#</th><th>${t('colRequester')}</th><th>${t('colRequested')}</th><th>${t('colCompany')}</th><th>${t('colCity')}</th><th>${t('colApiCompany')}</th><th>${t('colApiCity')}</th><th>${t('colStatus')}</th></tr></thead><tbody>${rowsHtml}</tbody></table>${overflowNote}`;
     }
 
-    updateDashboard();
+    setLanguage('de');
   </script>
 </body>
 </html>
