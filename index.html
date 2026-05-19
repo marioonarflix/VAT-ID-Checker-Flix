@@ -587,14 +587,11 @@
 
     function renderTable(rows, showErrors = false) {
       if (!rows.length) return `<p class="small">${t('noDataError')}</p>`;
-      const headers = ['#', t('colRequester'), t('colRequested'), t('colCompany'), t('colCity'), t('colStatus'), t('colDetails')];
-      const cols = ['index', 'anfragendeUstid', 'angefragteUstid', 'firmenname', 'ort', 'status'];
+      const headers = ['#', t('colRequester'), t('colRequested')];
+      const cols = ['index', 'anfragendeUstid', 'angefragteUstid'];
 
       const rowsHtml = rows.map(row => {
-        const badgeClass = row.valid ? 'ok' : 'error';
-        const statusText = row.valid ? t('statusValid') : t('statusInvalid');
-        const detailText = showErrors && row.errors.length ? `<div class="small">${row.errors.map(errorKey => t(errorKey)).join('; ')}</div>` : '';
-        return `<tr>${cols.map(col => `<td>${escapeHtml(row[col] || '')}</td>`).join('')}<td>${row.valid ? `<span class="badge ok">${statusText}</span>` : `<span class="badge error">${statusText}</span>`}${detailText}</td></tr>`;
+        return `<tr>${cols.map(col => `<td>${escapeHtml(row[col] || '')}</td>`).join('')}</tr>`;
       }).join('');
 
       return `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>`;
