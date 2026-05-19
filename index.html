@@ -722,21 +722,13 @@
     }
 
     function exportResults() {
-      const headers = ['index','anfragendeUstid','angefragteUstid','firmenname','ort','strasse','plz','apiFirma','apiOrt','apiStrasse','apiPlz','status','detail','apiStatus','apiStatusExplanation','apiResponse'];
+      const headers = ['index','anfragendeUstid','angefragteUstid','status','detail','apiStatus','apiStatusExplanation','apiResponse'];
       const rows = importedRows.map(row => {
         const apiStatus = row.json?.status || '';
         return [
           row.index,
           row.anfragendeUstid,
           row.angefragteUstid,
-          row.firmenname,
-          row.ort,
-          row.strasse,
-          row.plz,
-          row.apiFirma,
-          row.apiOrt,
-          row.apiStrasse,
-          row.apiPlz,
           row.status,
           row.detail,
           apiStatus,
@@ -778,23 +770,17 @@
       const rowsHtml = displayedRows.map(row => {
         const badgeType = row.checked ? (row.passed && row.json?.status === 'evatr-0000' ? 'ok' : 'error') : row.valid ? 'warn' : 'error';
         const statusText = t(row.statusKey || 'statusNotChecked');
-        const apiFields = [row.apiFirma, row.apiOrt, row.apiStrasse, row.apiPlz].filter(Boolean);
-        const apiInfo = row.checked ? (apiFields.length ? `${t('apiLabel')}: ${escapeHtml(apiFields.join(' | '))}` : t('apiNoData')) : '';
         const detailText = row.detailKey ? `<div class="small">${escapeHtml(t(row.detailKey, row.detailParams || {}))}</div>` : '';
-        const details = `${detailText}${apiInfo ? `<div class="small">${apiInfo}</div>` : ''}`;
+        const details = detailText;
         return `<tr>
           <td>${row.index}</td>
           <td>${escapeHtml(row.anfragendeUstid)}</td>
           <td>${escapeHtml(row.angefragteUstid)}</td>
-          <td>${escapeHtml(row.firmenname)}</td>
-          <td>${escapeHtml(row.ort)}</td>
-          <td>${escapeHtml(row.apiFirma)}</td>
-          <td>${escapeHtml(row.apiOrt)}</td>
           <td><span class="badge ${badgeType}">${statusText}</span>${details}</td>
         </tr>`;
       }).join('');
 
-      resultTableWrapper.innerHTML = `<table><thead><tr><th>#</th><th>${t('colRequester')}</th><th>${t('colRequested')}</th><th>${t('colCompany')}</th><th>${t('colCity')}</th><th>${t('colApiCompany')}</th><th>${t('colApiCity')}</th><th>${t('colStatus')}</th></tr></thead><tbody>${rowsHtml}</tbody></table>${overflowNote}`;
+      resultTableWrapper.innerHTML = `<table><thead><tr><th>#</th><th>${t('colRequester')}</th><th>${t('colRequested')}</th><th>${t('colStatus')}</th></tr></thead><tbody>${rowsHtml}</tbody></table>${overflowNote}`;
     }
 
     setLanguage('de');
