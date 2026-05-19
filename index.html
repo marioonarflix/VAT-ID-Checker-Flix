@@ -77,10 +77,6 @@
           <label for="fileInput" id="fileLabel">Datei importieren</label>
           <input id="fileInput" type="file" accept=".csv,.xls,.xlsx" />
           <p class="small" id="fileHelp">Erlaubte Spalten: <code>anfragendeUstid</code>, <code>angefragteUstid</code>, <code>firmenname</code>, <code>ort</code>, <code>strasse</code>, <code>plz</code>.</p>
-          <div class="controls">
-            <button id="performImport" type="button" disabled>Importieren</button>
-            <button id="clearImport" type="button" disabled>Datei zurücksetzen</button>
-          </div>
         </div>
       </div>
 
@@ -97,6 +93,11 @@
         <h2 id="previewTitle">Import-Vorschau</h2>
         <div id="previewSummary" class="info-block"></div>
         <div id="previewTableWrapper"></div>
+      </div>
+
+      <div class="controls">
+        <button id="performImport" type="button" disabled>Importieren</button>
+        <button id="clearImport" type="button" disabled>Datei zurücksetzen</button>
       </div>
 
       <button id="batchCheckButton" type="button" disabled>Prüfen</button>
