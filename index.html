@@ -190,6 +190,11 @@
         statusSuccessful: 'Erfolgreich',
         statusError: 'Fehler',
         statusConnectionError: 'Verbindungsfehler',
+        statusExplanationHeader: 'Status-Beschreibung',
+        statusCodeValid: 'UST-ID ist gültig',
+        statusCodeInvalid: 'UST-ID ist ungültig',
+        statusCodeUnknown: 'Unbekannter eVATR-Status',
+        noApiStatus: 'Keine API-Antwort',
         detailInvalidMissingFields: 'Ungültige Zeile: {errors}',
         detailNotChecked: '',
         detailChecking: 'Wird geprüft...',
@@ -255,6 +260,11 @@
         statusSuccessful: 'Successful',
         statusError: 'Error',
         statusConnectionError: 'Connection error',
+        statusExplanationHeader: 'Status description',
+        statusCodeValid: 'VAT ID is valid',
+        statusCodeInvalid: 'VAT ID is invalid',
+        statusCodeUnknown: 'Unknown eVATR status',
+        noApiStatus: 'No API response',
         detailInvalidMissingFields: 'Invalid row: {errors}',
         detailNotChecked: '',
         detailChecking: 'Checking...',
@@ -699,25 +709,41 @@
       updateDashboard();
     }
 
+    function getStatusExplanation(status) {
+      if (!status) return t('noApiStatus');
+      switch (status) {
+        case 'evatr-0000':
+          return t('statusCodeValid');
+        case 'evatr-0005':
+          return t('statusCodeInvalid');
+        default:
+          return t('statusCodeUnknown');
+      }
+    }
+
     function exportResults() {
-      const headers = ['index','anfragendeUstid','angefragteUstid','firmenname','ort','strasse','plz','apiFirma','apiOrt','apiStrasse','apiPlz','status','detail','apiStatus','apiResponse'];
-      const rows = importedRows.map(row => [
-        row.index,
-        row.anfragendeUstid,
-        row.angefragteUstid,
-        row.firmenname,
-        row.ort,
-        row.strasse,
-        row.plz,
-        row.apiFirma,
-        row.apiOrt,
-        row.apiStrasse,
-        row.apiPlz,
-        row.status,
-        row.detail,
-        row.json?.status || '',
-        row.json ? JSON.stringify(row.json) : ''
-      ]);
+      const headers = ['index','anfragendeUstid','angefragteUstid','firmenname','ort','strasse','plz','apiFirma','apiOrt','apiStrasse','apiPlz','status','detail','apiStatus','apiStatusExplanation','apiResponse'];
+      const rows = importedRows.map(row => {
+        const apiStatus = row.json?.status || '';
+        return [
+          row.index,
+          row.anfragendeUstid,
+          row.angefragteUstid,
+          row.firmenname,
+          row.ort,
+          row.strasse,
+          row.plz,
+          row.apiFirma,
+          row.apiOrt,
+          row.apiStrasse,
+          row.apiPlz,
+          row.status,
+          row.detail,
+          apiStatus,
+          apiStatus ? `${apiStatus} = ${getStatusExplanation(apiStatus)}` : t('noApiStatus'),
+          row.json ? JSON.stringify(row.json) : ''
+        ];
+      });
       const separator = ';';
       const csvBody = [headers.join(separator), ...rows.map(row => row.map(escapeCSV).join(separator))].join('\n');
       const csv = '\uFEFF' + csvBody;
